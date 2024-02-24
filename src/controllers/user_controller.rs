@@ -1,14 +1,23 @@
 use crate::models::user_model::{User, UserBody};
 use axum::{extract::Path, http::StatusCode, Json};
-use serde_json::{json, Value};
 
-pub async fn get_users() -> (StatusCode, Json<Value>) {
-    let body: Value = json!([
-        { "name": "Leandro" },
-        { "name": "João"}
-    ]);
+pub async fn get_users() -> (StatusCode, Json<Vec<User>>) {
+    let users: Vec<User> = vec![
+        User { 
+            id: String::from("dskjhad38393"),
+            name: String::from("Leandro"),
+            email: String::from("titenq@gmail.com"),
+            password: String::from("123456")
+        },
+        User { 
+            id: String::from("afseraae3t5435e"),
+            name: String::from("João"),
+            email: String::from("joao@gmail.com"),
+            password: String::from("abcdef")
+        },
+    ];
 
-    (StatusCode::OK, Json(body))
+    (StatusCode::OK, Json(users))
 }
 
 pub async fn get_user_by_id(Path(id): Path<String>) -> (StatusCode, Json<User>) {
