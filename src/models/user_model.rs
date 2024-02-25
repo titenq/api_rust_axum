@@ -7,7 +7,7 @@ pub struct UserBody {
     pub password: String,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Serialize)]
 pub struct User {
     pub id: String,
     pub name: String,
