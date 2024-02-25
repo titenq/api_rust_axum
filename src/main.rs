@@ -1,7 +1,7 @@
+mod routes;
+mod structs;
 mod controllers;
 mod libs;
-mod models;
-mod routes;
 
 use axum::Router;
 use tokio::net::TcpListener;

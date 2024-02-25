@@ -1,6 +1,8 @@
 use axum::{routing::get, Router};
 
-use crate::controllers::user_controller::{create_user, get_user_by_id, get_users};
+use user_controller::{create_user, get_user_by_id, get_users};
+
+use crate::controllers::user_controller;
 
 pub fn get_router() -> Router {
     Router::new()
