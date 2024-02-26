@@ -20,11 +20,10 @@ type Result<T> = std::result::Result<T, MyError>;
 
 impl DB {
     pub async fn init() -> Result<Self> {
-        let mongodb_uri = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set.");
-        let database_name =
-            std::env::var("MONGO_INITDB_DATABASE").expect("MONGO_INITDB_DATABASE must be set.");
-        let collection_name =
-            std::env::var("MONGODB_NOTE_COLLECTION").expect("MONGODB_NOTE_COLLECTION must be set.");
+        let mongodb_uri = std::env::var("DATABASE_URL")
+            .expect("DATABASE_URL must be set.");
+        let database_name = std::env::var("MONGO_INITDB_DATABASE")
+            .expect("MONGO_INITDB_DATABASE must be set.");
 
         let mut client_options = ClientOptions::parse(mongodb_uri).await?;
         client_options.app_name = Some(database_name.to_string());
@@ -32,8 +31,8 @@ impl DB {
         let client = Client::with_options(client_options)?;
         let database = client.database(database_name.as_str());
 
-        let note_collection = database.collection(collection_name.as_str());
-        let collection = database.collection::<Document>(collection_name.as_str());
+        let note_collection: Collection<NoteModel> = database.collection("notes");
+        let collection: Collection<Document> = database.collection::<Document>("notes");
 
         println!("✅ Database connected successfully");
 
