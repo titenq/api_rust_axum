@@ -1,26 +1,8 @@
 use std::sync::Arc;
 
-use axum::{
-    extract::{Path, Query, State},
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
-};
+use axum::{extract::{Path, Query, State}, http::StatusCode, response::IntoResponse, Json};
 
-use crate::{
-    error::MyError, schema::{CreateNoteSchema, FilterOptions, UpdateNoteSchema}, AppState
-};
-
-pub async fn health_checker_handler() -> impl IntoResponse {
-    const MESSAGE: &str = "RESTful API in Rust using Axum Framework and MongoDB";
-
-    let json_response = serde_json::json!({
-        "status": "success",
-        "message": MESSAGE
-    });
-
-    Json(json_response)
-}
+use crate::{error::MyError, schema::{CreateNoteSchema, FilterOptions, UpdateNoteSchema}, AppState};
 
 pub async fn note_list_handler(
     opts: Option<Query<FilterOptions>>,

@@ -5,11 +5,11 @@ mod models;
 
 mod db;
 mod error;
-mod handler;
 mod model;
 mod response;
 mod route;
 mod schema;
+mod handlers;
 
 use std::sync::Arc;
 
