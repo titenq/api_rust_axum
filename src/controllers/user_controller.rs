@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     libs::remove_accent,
-    structs::user_struct::{User, UserBody},
+    models::user_model::{User, UserBody},
 };
 use axum::{
     extract::{Path, Query},
