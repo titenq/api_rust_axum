@@ -5,7 +5,6 @@ mod models;
 
 mod db;
 mod error;
-mod model;
 mod response;
 mod route;
 mod schema;

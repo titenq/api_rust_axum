@@ -1,5 +1,4 @@
-use crate::error::MyError;
-use crate::model::NoteModel;
+use crate::{error::MyError, models::note_model::NoteModel};
 use mongodb::{bson::Document, options::ClientOptions, Client, Collection, Database};
 
 #[derive(Clone, Debug)]

@@ -12,7 +12,7 @@ use mongodb::{
 use crate::{
     db::DB,
     error::MyError::{self, *},
-    model::NoteModel,
+    models::note_model::NoteModel,
     response::{NoteData, NoteListResponse, NoteResponse, SingleNoteResponse},
     schema::{CreateNoteSchema, UpdateNoteSchema},
 };
