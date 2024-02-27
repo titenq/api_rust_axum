@@ -107,7 +107,7 @@ impl DB {
     pub async fn edit_note(&self, id: &str, body: &UpdateNoteSchema) -> Result<SingleNoteResponse> {
         let oid = ObjectId::from_str(id).map_err(|_| InvalidIDError(id.to_owned()))?;
 
-        let mut update = doc! {
+        let update = doc! {
             "$set": bson::to_document(body).map_err(MongoSerializeBsonError)?,
         };
 
@@ -129,6 +129,22 @@ impl DB {
             Ok(note_response)
         } else {
             Err(NotFoundError(id.to_string()))
+        }
+    }
+
+    pub async fn delete_note(&self, id: &str) -> Result<()> {
+        let oid = ObjectId::from_str(id).map_err(|_| InvalidIDError(id.to_owned()))?;
+        let filter = doc! {"_id": oid };
+
+        let result = self
+            .collection
+            .delete_one(filter, None)
+            .await
+            .map_err(MongoQueryError)?;
+
+        match result.deleted_count {
+            0 => Err(NotFoundError(id.to_string())),
+            _ => Ok(()),
         }
     }
 
