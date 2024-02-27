@@ -1,4 +1,6 @@
+use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use mongodb::bson;
 
 #[derive(Deserialize, Debug, Default)]
 pub struct FilterOptions {
@@ -21,6 +23,7 @@ pub struct CreateNoteSchema {
     pub published: Option<bool>,
 }
 
+#[allow(non_snake_case)]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateNoteSchema {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -31,4 +34,6 @@ pub struct UpdateNoteSchema {
     pub category: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub published: Option<bool>,
+    #[serde(default = "Utc::now", with = "bson::serde_helpers::chrono_datetime_as_bson_datetime")]
+    pub updatedAt: DateTime<Utc>,
 }

@@ -10,6 +10,7 @@ mod response;
 mod route;
 mod schema;
 mod handlers;
+mod services;
 
 use std::sync::Arc;
 

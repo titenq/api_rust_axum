@@ -1,8 +1,17 @@
 use std::sync::Arc;
 
-use axum::{extract::{Path, Query, State}, http::StatusCode, response::IntoResponse, Json};
+use axum::{
+    extract::{Path, Query, State},
+    http::StatusCode,
+    response::IntoResponse,
+    Json,
+};
 
-use crate::{error::MyError, schema::{CreateNoteSchema, FilterOptions, UpdateNoteSchema}, AppState};
+use crate::{
+    error::MyError,
+    schema::{CreateNoteSchema, FilterOptions, UpdateNoteSchema},
+    AppState,
+};
 
 pub async fn note_list_handler(
     opts: Option<Query<FilterOptions>>,
@@ -15,7 +24,7 @@ pub async fn note_list_handler(
 
     match app_state
         .db
-        .fetch_notes(limit, page)
+        .get_all_notes(limit, page)
         .await
         .map_err(MyError::from)
     {
@@ -38,7 +47,12 @@ pub async fn get_note_handler(
     Path(id): Path<String>,
     State(app_state): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
-    match app_state.db.get_note(&id).await.map_err(MyError::from) {
+    match app_state
+        .db
+        .get_note_by_id(&id)
+        .await
+        .map_err(MyError::from)
+    {
         Ok(res) => Ok(Json(res)),
         Err(e) => Err(e.into()),
     }
