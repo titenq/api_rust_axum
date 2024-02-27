@@ -13,22 +13,10 @@ use crate::{
     AppState,
 };
 
-/* pub fn create_router(app_state: Arc<AppState>) -> Router {
-    Router::new()
-        .route("/", get(get_handler))
-        .route("/notes", get(note_list_handler)
-            .post(create_note_handler))
-        .route("/notes/:id", get(get_note_handler)
-            .patch(edit_note_handler)
-            .delete(delete_note_handler),
-        )
-        .with_state(app_state)
-} */
-
 pub fn create_router(app_state: Arc<AppState>) -> Router {
     let home_route = Router::new().route("/", get(get_handler));
 
-    let routes = Router::new()
+    let notes_route = Router::new()
         .route("/notes", get(note_list_handler)
             .post(create_note_handler))
         .route("/notes/:id", get(get_note_handler)
@@ -37,6 +25,18 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         )
         .with_state(app_state);
 
-        Router::new().nest("/", home_route).nest("/", routes)
+    /* let users_route = Router::new()
+        .route("/users", get(user_list_handler)
+            .post(create_user_handler))
+        .route("/users/:id", get(get_user_handler)
+            .patch(edit_user_handler)
+            .delete(delete_user_handler),
+        )
+        .with_state(app_state); */
+
+        Router::new()
+            .nest("/", home_route)
+            .nest("/", notes_route)
+            // .nest("/", users_route)
 }
 

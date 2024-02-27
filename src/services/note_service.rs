@@ -78,7 +78,7 @@ impl DB {
             Err(e) => return Err(MongoQueryError(e)),
         };
 
-        let insert_result: InsertOneResult = match self.collection.insert_one(&document, None).await
+        let insert_result: InsertOneResult = match self.note_document.insert_one(&document, None).await
         {
             Ok(result) => result,
             Err(e) => {
@@ -147,7 +147,7 @@ impl DB {
         let filter: Document = doc! {"_id": oid };
 
         let result: DeleteResult = self
-            .collection
+            .note_document
             .delete_one(filter, None)
             .await
             .map_err(MongoQueryError)?;
