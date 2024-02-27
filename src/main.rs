@@ -6,7 +6,6 @@ mod libs;
 mod models;
 mod responses;
 mod route;
-mod routes;
 mod schema;
 mod services;
 
@@ -27,8 +26,6 @@ use error::MyError;
 use route::create_router;
 use tower_http::cors::CorsLayer;
 
-// use crate::routes::get_router;
-
 pub struct AppState {
     db: DB,
 }
@@ -38,7 +35,6 @@ async fn main() -> Result<(), MyError> {
     dotenv().ok();
 
     let db: DB = DB::init().await?;
-    // let app: Router = get_router();
 
     let cors: CorsLayer = CorsLayer::new()
         .allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
@@ -48,10 +44,10 @@ async fn main() -> Result<(), MyError> {
 
     let app: Router = create_router(Arc::new(AppState { db: db.clone() })).layer(cors);
 
-    println!("🚀 Server started successfully");
-
     let listener: TcpListener = TcpListener::bind("127.0.0.1:5000").await.unwrap();
 
+    println!("🚀 Server started successfully");
+    
     serve(listener, app).await.unwrap();
 
     Ok(())
