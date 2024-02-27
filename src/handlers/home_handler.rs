@@ -1,12 +1,9 @@
-use axum::{response::IntoResponse, Json};
+use axum::Json;
 
-pub async fn home_handler() -> impl IntoResponse {
-    const MESSAGE: &str = "RESTful API in Rust using Axum Framework and MongoDB";
+use crate::{responses::home_response::HomeResponse, services::home_service::home_message};
 
-    let json_response = serde_json::json!({
-        "status": "success",
-        "message": MESSAGE
-    });
+pub async fn get_handler() -> Json<HomeResponse> {
+    let response: HomeResponse = home_message();
 
-    Json(json_response)
+    Json(response)
 }

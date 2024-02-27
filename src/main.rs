@@ -1,24 +1,26 @@
-mod routes;
 mod controllers;
-mod libs;
-mod models;
-
 mod db;
 mod error;
-mod response;
-mod route;
-mod schema;
 mod handlers;
+mod libs;
+mod models;
+mod responses;
+mod route;
+mod routes;
+mod schema;
 mod services;
 
 use std::sync::Arc;
 
 use tokio::net::TcpListener;
-// use axum::{response::IntoResponse, routing::get, Json, Router};
-use axum::{http::{
-    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
-    HeaderValue, Method,
-}, serve, Router};
+
+use axum::{
+    http::{
+        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+        HeaderValue, Method,
+    },
+    serve, Router,
+};
 use db::DB;
 use dotenv::dotenv;
 use error::MyError;

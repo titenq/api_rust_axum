@@ -13,7 +13,7 @@ use crate::{
     db::DB,
     error::MyError::{self, *},
     models::note_model::NoteModel,
-    response::{NoteData, NoteListResponse, NoteResponse, SingleNoteResponse},
+    responses::note_response::{NoteData, NoteListResponse, NoteResponse, SingleNoteResponse},
     schema::{CreateNoteSchema, UpdateNoteSchema},
 };
 
