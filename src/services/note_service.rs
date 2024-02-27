@@ -2,20 +2,31 @@ use std::str::FromStr;
 
 use chrono::prelude::*;
 use futures::StreamExt;
-use mongodb::{bson::{self, doc, oid::ObjectId}, options::{FindOneAndUpdateOptions, FindOptions, IndexOptions, ReturnDocument}, IndexModel};
+use mongodb::{
+    bson::{self, doc, oid::ObjectId, Bson, Document},
+    options::{FindOneAndUpdateOptions, FindOptions, IndexOptions, ReturnDocument},
+    results::{DeleteResult, InsertOneResult},
+    Cursor, IndexModel,
+};
 
-use crate::{db::DB, error::MyError::{self, *}, model::NoteModel, response::{NoteData, NoteListResponse, NoteResponse, SingleNoteResponse}, schema::{CreateNoteSchema, UpdateNoteSchema}};
+use crate::{
+    db::DB,
+    error::MyError::{self, *},
+    model::NoteModel,
+    response::{NoteData, NoteListResponse, NoteResponse, SingleNoteResponse},
+    schema::{CreateNoteSchema, UpdateNoteSchema},
+};
 
 type Result<T> = std::result::Result<T, MyError>;
 
 impl DB {
     pub async fn get_all_notes(&self, limit: i64, page: i64) -> Result<NoteListResponse> {
-        let find_options = FindOptions::builder()
+        let find_options: FindOptions = FindOptions::builder()
             .limit(limit)
             .skip(u64::try_from((page - 1) * limit).unwrap())
             .build();
 
-        let mut cursor = self
+        let mut cursor: Cursor<NoteModel> = self
             .note_collection
             .find(None, find_options)
             .await
@@ -35,9 +46,9 @@ impl DB {
     }
 
     pub async fn get_note_by_id(&self, id: &str) -> Result<NoteResponse> {
-        let oid = ObjectId::from_str(id).map_err(|_| InvalidIDError(id.to_owned()))?;
+        let oid: ObjectId = ObjectId::from_str(id).map_err(|_| InvalidIDError(id.to_owned()))?;
 
-        let note_doc = self
+        let note_doc: Option<NoteModel> = self
             .note_collection
             .find_one(doc! {"_id":oid }, None)
             .await
@@ -45,7 +56,7 @@ impl DB {
 
         match note_doc {
             Some(doc) => {
-                let note = self.doc_to_note_service(&doc)?;
+                let note: NoteResponse = self.doc_to_note_service(&doc)?;
                 Ok(note)
             }
             None => Err(NotFoundError(id.to_string())),
@@ -53,13 +64,13 @@ impl DB {
     }
 
     pub async fn create_note(&self, body: &CreateNoteSchema) -> Result<SingleNoteResponse> {
-        let published = body.published.to_owned().unwrap_or(false);
-        let category = body.category.to_owned().unwrap_or_default();
+        let published: bool = body.published.to_owned().unwrap_or(false);
+        let category: String = body.category.to_owned().unwrap_or_default();
 
-        let document = self.create_note_document_service(body, published, category)?;
+        let document: Document = self.create_note_document_service(body, published, category)?;
 
-        let options = IndexOptions::builder().unique(true).build();
-        let index = IndexModel::builder()
+        let options: IndexOptions = IndexOptions::builder().unique(true).build();
+        let index: IndexModel = IndexModel::builder()
             .keys(doc! {"title": 1})
             .options(options)
             .build();
@@ -69,7 +80,8 @@ impl DB {
             Err(e) => return Err(MongoQueryError(e)),
         };
 
-        let insert_result = match self.collection.insert_one(&document, None).await {
+        let insert_result: InsertOneResult = match self.collection.insert_one(&document, None).await
+        {
             Ok(result) => result,
             Err(e) => {
                 if e.to_string()
@@ -81,12 +93,12 @@ impl DB {
             }
         };
 
-        let new_id = insert_result
+        let new_id: ObjectId = insert_result
             .inserted_id
             .as_object_id()
             .expect("issue with new _id");
 
-        let note_doc = match self
+        let note_doc: NoteModel = match self
             .note_collection
             .find_one(doc! {"_id": new_id}, None)
             .await
@@ -100,18 +112,18 @@ impl DB {
             status: "success",
             data: NoteData {
                 note: self.doc_to_note_service(&note_doc)?,
-            },  
+            },
         })
     }
 
     pub async fn edit_note(&self, id: &str, body: &UpdateNoteSchema) -> Result<SingleNoteResponse> {
-        let oid = ObjectId::from_str(id).map_err(|_| InvalidIDError(id.to_owned()))?;
+        let oid: ObjectId = ObjectId::from_str(id).map_err(|_| InvalidIDError(id.to_owned()))?;
 
-        let update = doc! {
+        let update: Document = doc! {
             "$set": bson::to_document(body).map_err(MongoSerializeBsonError)?,
         };
 
-        let options = FindOneAndUpdateOptions::builder()
+        let options: FindOneAndUpdateOptions = FindOneAndUpdateOptions::builder()
             .return_document(ReturnDocument::After)
             .build();
 
@@ -121,8 +133,8 @@ impl DB {
             .await
             .map_err(MongoQueryError)?
         {
-            let note = self.doc_to_note_service(&doc)?;
-            let note_response = SingleNoteResponse {
+            let note: NoteResponse = self.doc_to_note_service(&doc)?;
+            let note_response: SingleNoteResponse = SingleNoteResponse {
                 status: "success",
                 data: NoteData { note },
             };
@@ -133,10 +145,10 @@ impl DB {
     }
 
     pub async fn delete_note(&self, id: &str) -> Result<()> {
-        let oid = ObjectId::from_str(id).map_err(|_| InvalidIDError(id.to_owned()))?;
-        let filter = doc! {"_id": oid };
+        let oid: ObjectId = ObjectId::from_str(id).map_err(|_| InvalidIDError(id.to_owned()))?;
+        let filter: Document = doc! {"_id": oid };
 
-        let result = self
+        let result: DeleteResult = self
             .collection
             .delete_one(filter, None)
             .await
@@ -149,7 +161,7 @@ impl DB {
     }
 
     fn doc_to_note_service(&self, note: &NoteModel) -> Result<NoteResponse> {
-        let note_response = NoteResponse {
+        let note_response: NoteResponse = NoteResponse {
             id: note.id.to_hex(),
             title: note.title.to_owned(),
             content: note.content.to_owned(),
@@ -168,12 +180,12 @@ impl DB {
         published: bool,
         category: String,
     ) -> Result<bson::Document> {
-        let serialized_data = bson::to_bson(body).map_err(MongoSerializeBsonError)?;
-        let document = serialized_data.as_document().unwrap();
+        let serialized_data: Bson = bson::to_bson(body).map_err(MongoSerializeBsonError)?;
+        let document: &Document = serialized_data.as_document().unwrap();
 
-        let datetime = Utc::now();
+        let datetime: DateTime<Utc> = Utc::now();
 
-        let mut doc_with_dates = doc! {
+        let mut doc_with_dates: Document = doc! {
             "createdAt": datetime,
             "updatedAt": datetime,
             "published": published,
