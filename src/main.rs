@@ -1,12 +1,9 @@
-mod controllers;
 mod db;
 mod error;
 mod handlers;
 mod libs;
 mod models;
-mod responses;
 mod route;
-mod schema;
 mod services;
 
 use std::sync::Arc;

@@ -9,9 +9,7 @@ use axum::{
 use serde_json::Value;
 
 use crate::{
-    error::MyError,
-    schema::{CreateNoteSchema, FilterOptions, UpdateNoteSchema},
-    AppState,
+    error::MyError, models::note_model::{CreateNoteRequest, FilterOptions, UpdateNoteRequest}, AppState
 };
 
 pub async fn note_list_handler(
@@ -36,7 +34,7 @@ pub async fn note_list_handler(
 
 pub async fn create_note_handler(
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<CreateNoteSchema>,
+    Json(body): Json<CreateNoteRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
     match app_state.db.create_note(&body).await.map_err(MyError::from) {
         Ok(res) => Ok((StatusCode::CREATED, Json(res))),
@@ -62,7 +60,7 @@ pub async fn get_note_handler(
 pub async fn edit_note_handler(
     Path(id): Path<String>,
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<UpdateNoteSchema>,
+    Json(body): Json<UpdateNoteRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
     match app_state
         .db

@@ -12,9 +12,7 @@ use mongodb::{
 use crate::{
     db::DB,
     error::MyError::{self, *},
-    models::note_model::NoteModel,
-    responses::note_response::{NoteData, NoteListResponse, NoteResponse, SingleNoteResponse},
-    schema::{CreateNoteSchema, UpdateNoteSchema},
+    models::note_model::{CreateNoteRequest, NoteData, NoteListResponse, NoteModel, NoteResponse, SingleNoteResponse, UpdateNoteRequest}
 };
 
 type Result<T> = std::result::Result<T, MyError>;
@@ -50,7 +48,7 @@ impl DB {
 
         let note_doc: Option<NoteModel> = self
             .note_collection
-            .find_one(doc! {"_id":oid }, None)
+            .find_one(doc! { "_id": oid }, None)
             .await
             .map_err(MongoQueryError)?;
 
@@ -63,7 +61,7 @@ impl DB {
         }
     }
 
-    pub async fn create_note(&self, body: &CreateNoteSchema) -> Result<SingleNoteResponse> {
+    pub async fn create_note(&self, body: &CreateNoteRequest) -> Result<SingleNoteResponse> {
         let published: bool = body.published.to_owned().unwrap_or(false);
         let category: String = body.category.to_owned().unwrap_or_default();
 
@@ -116,7 +114,7 @@ impl DB {
         })
     }
 
-    pub async fn edit_note(&self, id: &str, body: &UpdateNoteSchema) -> Result<SingleNoteResponse> {
+    pub async fn edit_note(&self, id: &str, body: &UpdateNoteRequest) -> Result<SingleNoteResponse> {
         let oid: ObjectId = ObjectId::from_str(id).map_err(|_| InvalidIDError(id.to_owned()))?;
 
         let update: Document = doc! {
@@ -176,7 +174,7 @@ impl DB {
 
     fn create_note_document_service(
         &self,
-        body: &CreateNoteSchema,
+        body: &CreateNoteRequest,
         published: bool,
         category: String,
     ) -> Result<bson::Document> {

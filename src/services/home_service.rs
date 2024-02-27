@@ -1,4 +1,4 @@
-use crate::responses::home_response::HomeResponse;
+use crate::models::home_model::HomeResponse;
 
 pub fn home_message() -> HomeResponse {
     const MESSAGE: &str = "RESTful API in Rust using Axum Framework and MongoDB";

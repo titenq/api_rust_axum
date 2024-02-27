@@ -1,2 +1,3 @@
-pub mod user_model;
+pub mod home_model;
 pub mod note_model;
+pub mod user_model;
