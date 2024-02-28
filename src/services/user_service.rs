@@ -18,25 +18,31 @@ use crate::{
 type Result<T> = std::result::Result<T, MyError>;
 
 impl DB {
-    pub async fn get_users_service(&self, limit: i64, page: i64) -> Result<UserListResponse> {
-        let count = self.user_collection.count_documents(doc! {}, None).await?;
+    pub async fn get_users_service(&self, limit: i64, page: i64, name: String) -> Result<UserListResponse> {
         let find_options: FindOptions = FindOptions::builder()
             .limit(limit)
             .skip(u64::try_from((page - 1) * limit).unwrap())
             .build();
+        let mut query_filter = doc! {};
 
+        if !name.is_empty() {
+            query_filter.insert("name", doc! { "$regex": format!(".*{}.*", name), "$options": "i" });
+        }
+
+        let count = self.user_collection.count_documents(query_filter.clone(), None).await?;
+    
         let mut cursor: Cursor<UserModel> = self
             .user_collection
-            .find(None, find_options)
+            .find(Some(query_filter), find_options)
             .await
             .map_err(MongoQueryError)?;
-
+    
         let mut json_result: Vec<UserResponse> = Vec::new();
-
+    
         while let Some(doc) = cursor.next().await {
             json_result.push(self.doc_to_user_service(&doc.unwrap())?);
         }
-
+    
         Ok(UserListResponse {
             currentPage: page as usize,
             totalPages: count.div_ceil(limit as u64) as usize,

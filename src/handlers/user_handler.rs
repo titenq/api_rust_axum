@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
     error::MyError,
     libs::remove_accent,
-    models::user_model::{CreateUserRequest, UpdateUserRequest, UserFilterOptions, UserModel},
+    models::user_model::{CreateUserRequest, UpdateUserRequest, UserFilterOptions},
     AppState,
 };
 use axum::{
@@ -22,10 +22,11 @@ pub async fn get_users(
 
     let limit = opts.limit.unwrap_or(2) as i64;
     let page = opts.page.unwrap_or(1) as i64;
+    let name = opts.name.unwrap_or("".to_string());
 
     match app_state
         .db
-        .get_users_service(limit, page)
+        .get_users_service(limit, page, name)
         .await
         .map_err(MyError::from)
     {
@@ -33,24 +34,6 @@ pub async fn get_users(
         Err(e) => Err(e.into()),
     }
 }
-
-/* pub async fn get_users(
-    Query(params): Query<HashMap<String, String>>,
-) -> (StatusCode, Json<Vec<UserModel>>) {
-    if params.contains_key("name") {
-        let name = params.get("name").unwrap();
-        let normalizing_name = remove_accent(&name.to_lowercase());
-        let filtered_users: Vec<User> = users
-            .iter()
-            .filter(|&user| remove_accent(&user.name.to_lowercase()).contains(&normalizing_name))
-            .cloned()
-            .collect();
-
-        return (StatusCode::OK, Json(filtered_users));
-    }
-
-    (StatusCode::OK, Json(users))
-} */
 
 pub async fn get_user_by_id(
     Path(id): Path<String>,

@@ -69,6 +69,7 @@ pub struct UpdateUserRequest {
 
 #[derive(Deserialize, Debug, Default)]
 pub struct UserFilterOptions {
+    pub name: Option<String>,
     pub page: Option<usize>,
     pub limit: Option<usize>
 }
