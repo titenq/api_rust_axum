@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use crate::{
     error::MyError,
-    libs::remove_accent,
     models::user_model::{CreateUserRequest, UpdateUserRequest, UserFilterOptions},
     AppState,
 };

@@ -10,9 +10,7 @@ use mongodb::{
 };
 
 use crate::{
-    db::DB,
-    error::MyError::{self, *},
-    models::user_model::{CreateUserRequest, UpdateUserRequest, UserListResponse, UserModel, UserResponse},
+    db::DB, error::MyError::{self, *}, libs::remove_accent, models::user_model::{CreateUserRequest, UpdateUserRequest, UserListResponse, UserModel, UserResponse}
 };
 
 type Result<T> = std::result::Result<T, MyError>;
@@ -26,7 +24,9 @@ impl DB {
         let mut query_filter = doc! {};
 
         if !name.is_empty() {
-            query_filter.insert("name", doc! { "$regex": format!(".*{}.*", name), "$options": "i" });
+            let regex = format!(".*{}.*", remove_accent(&name));
+            
+            query_filter.insert("name", doc! { "$regex": regex, "$options": "i" });
         }
 
         let count = self.user_collection.count_documents(query_filter.clone(), None).await?;
