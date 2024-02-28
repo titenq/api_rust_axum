@@ -9,7 +9,9 @@ use axum::{
 use serde_json::Value;
 
 use crate::{
-    error::MyError, models::note_model::{CreateNoteRequest, FilterOptions, UpdateNoteRequest}, AppState
+    error::MyError,
+    models::note_model::{CreateNoteRequest, FilterOptions, UpdateNoteRequest},
+    AppState,
 };
 
 pub async fn note_list_handler(

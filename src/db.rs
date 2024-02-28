@@ -1,12 +1,16 @@
 use mongodb::{bson::Document, options::ClientOptions, Client, Collection, Database};
 
-use crate::{error::MyError, models::note_model::NoteModel};
+use crate::{
+    error::MyError,
+    models::{note_model::NoteModel, user_model::UserModel},
+};
 
 #[derive(Clone, Debug)]
 pub struct DB {
     pub note_collection: Collection<NoteModel>,
     pub note_document: Collection<Document>,
-    // pub user_collection: Collection<UserModel>,
+    pub user_collection: Collection<UserModel>,
+    pub user_document: Collection<Document>,
 }
 
 type Result<T> = std::result::Result<T, MyError>;
@@ -22,17 +26,20 @@ impl DB {
 
         let client: Client = Client::with_options(client_options)?;
         let database: Database = client.database(database_name.as_str());
-        
-        // let user_collection: Collection<UserModel> = database.collection("users");
+
         let note_collection: Collection<NoteModel> = database.collection::<NoteModel>("notes");
         let note_document: Collection<Document> = database.collection::<Document>("notes");
+
+        let user_collection: Collection<UserModel> = database.collection("users");
+        let user_document: Collection<Document> = database.collection::<Document>("users");
 
         println!("✅ Database connected successfully");
 
         Ok(Self {
             note_collection,
             note_document,
-            // user_collection,
+            user_collection,
+            user_document,
         })
     }
 }

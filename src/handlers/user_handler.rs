@@ -1,39 +1,42 @@
-use std::collections::HashMap;
+use std::sync::Arc;
 
 use crate::{
+    error::MyError,
     libs::remove_accent,
-    models::user_model::{User, UserBody},
+    models::user_model::{CreateUserRequest, UpdateUserRequest, UserFilterOptions, UserModel},
+    AppState,
 };
 use axum::{
-    extract::{Path, Query},
+    extract::{Path, Query, State},
     http::StatusCode,
+    response::IntoResponse,
     Json,
 };
+use serde_json::Value;
 
 pub async fn get_users(
-    Query(params): Query<HashMap<String, String>>,
-) -> (StatusCode, Json<Vec<User>>) {
-    let users: Vec<User> = vec![
-        User {
-            id: String::from("dskjhad38393"),
-            name: String::from("Adauto Leandro"),
-            email: String::from("titenq@gmail.com"),
-            password: String::from("123456"),
-        },
-        User {
-            id: String::from("dskjhad38393"),
-            name: String::from("Leandro Ribeiro"),
-            email: String::from("leandro@gmail.com"),
-            password: String::from("123456"),
-        },
-        User {
-            id: String::from("afseraae3t5435e"),
-            name: String::from("João"),
-            email: String::from("joao@gmail.com"),
-            password: String::from("abcdef"),
-        },
-    ];
+    opts: Option<Query<UserFilterOptions>>,
+    State(app_state): State<Arc<AppState>>,
+) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
+    let Query(opts) = opts.unwrap_or_default();
 
+    let limit = opts.limit.unwrap_or(2) as i64;
+    let page = opts.page.unwrap_or(1) as i64;
+
+    match app_state
+        .db
+        .get_users_service(limit, page)
+        .await
+        .map_err(MyError::from)
+    {
+        Ok(res) => Ok(Json(res)),
+        Err(e) => Err(e.into()),
+    }
+}
+
+/* pub async fn get_users(
+    Query(params): Query<HashMap<String, String>>,
+) -> (StatusCode, Json<Vec<UserModel>>) {
     if params.contains_key("name") {
         let name = params.get("name").unwrap();
         let normalizing_name = remove_accent(&name.to_lowercase());
@@ -47,26 +50,60 @@ pub async fn get_users(
     }
 
     (StatusCode::OK, Json(users))
+} */
+
+pub async fn get_user_by_id(
+    Path(id): Path<String>,
+    State(app_state): State<Arc<AppState>>,
+) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
+    match app_state
+        .db
+        .get_user_by_id_service(&id)
+        .await
+        .map_err(MyError::from)
+    {
+        Ok(res) => Ok(Json(res)),
+        Err(e) => Err(e.into()),
+    }
 }
 
-pub async fn get_user_by_id(Path(id): Path<String>) -> (StatusCode, Json<User>) {
-    let user: User = User {
-        id,
-        name: String::from("Leandro"),
-        email: String::from("titenq@gmail.com"),
-        password: String::from("123456"),
-    };
-
-    (StatusCode::OK, Json(user))
+pub async fn create_user(
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<CreateUserRequest>,
+) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
+    match app_state
+        .db
+        .create_user_service(&body)
+        .await
+        .map_err(MyError::from)
+    {
+        Ok(res) => Ok((StatusCode::CREATED, Json(res))),
+        Err(e) => Err(e.into()),
+    }
 }
 
-pub async fn create_user(Json(body): Json<UserBody>) -> (StatusCode, Json<User>) {
-    let user: User = User {
-        id: String::from("ytfuytdftytfyug"),
-        name: body.name,
-        email: body.email,
-        password: body.password,
-    };
+pub async fn edit_user(
+    Path(id): Path<String>,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<UpdateUserRequest>,
+) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
+    match app_state
+        .db
+        .edit_user_service(&id, &body)
+        .await
+        .map_err(MyError::from)
+    {
+        Ok(res) => Ok(Json(res)),
+        Err(e) => Err(e.into()),
+    }
+}
 
-    (StatusCode::CREATED, Json(user))
+pub async fn delete_user(
+    Path(id): Path<String>,
+    State(app_state): State<Arc<AppState>>,
+) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
+    match app_state.db.delete_user_service(&id).await.map_err(MyError::from) {
+        Ok(_) => Ok(StatusCode::NO_CONTENT),
+        Err(e) => Err(e.into()),
+    }
 }
