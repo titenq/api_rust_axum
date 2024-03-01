@@ -14,7 +14,7 @@ use crate::{
     AppState,
 };
 
-pub async fn note_list_handler(
+pub async fn note_list(
     opts: Option<Query<FilterOptions>>,
     State(app_state): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
@@ -34,7 +34,7 @@ pub async fn note_list_handler(
     }
 }
 
-pub async fn create_note_handler(
+pub async fn create_note(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<CreateNoteRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
@@ -44,7 +44,7 @@ pub async fn create_note_handler(
     }
 }
 
-pub async fn get_note_handler(
+/* pub async fn get_note_by_id(
     Path(id): Path<String>,
     State(app_state): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
@@ -57,9 +57,9 @@ pub async fn get_note_handler(
         Ok(res) => Ok(Json(res)),
         Err(e) => Err(e.into()),
     }
-}
+} */
 
-pub async fn edit_note_handler(
+pub async fn edit_note(
     Path(id): Path<String>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<UpdateNoteRequest>,
@@ -75,7 +75,7 @@ pub async fn edit_note_handler(
     }
 }
 
-pub async fn delete_note_handler(
+pub async fn delete_note(
     Path(id): Path<String>,
     State(app_state): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {

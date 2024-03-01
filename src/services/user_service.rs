@@ -48,7 +48,7 @@ impl DB {
         })
     }
 
-    pub async fn get_user_by_id_service(&self, id: &str) -> Result<UserResponse> {
+    pub async fn get_user_by_id(&self, id: &str) -> Result<UserResponse> {
         let oid: ObjectId = ObjectId::from_str(id).map_err(|_| InvalidIDError(id.to_owned()))?;
 
         let user_doc: Option<UserModel> = self
@@ -66,7 +66,7 @@ impl DB {
         }
     }
 
-    pub async fn create_user_service(&self, body: &CreateUserRequest) -> Result<UserResponse> {
+    pub async fn create_user(&self, body: &CreateUserRequest) -> Result<UserResponse> {
         let is_active: bool = body.isActive.to_owned().unwrap_or(false);
 
         let document: Document = self.create_user_document_service(body, is_active)?;

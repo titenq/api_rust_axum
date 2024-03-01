@@ -34,20 +34,20 @@ pub async fn get_users(
     }
 }
 
-pub async fn get_user_by_id(
+/* pub async fn get_user_by_id(
     Path(id): Path<String>,
     State(app_state): State<Arc<AppState>>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
     match app_state
         .db
-        .get_user_by_id_service(&id)
+        .get_user_by_id(&id)
         .await
         .map_err(MyError::from)
     {
         Ok(res) => Ok(Json(res)),
         Err(e) => Err(e.into()),
     }
-}
+} */
 
 pub async fn create_user(
     State(app_state): State<Arc<AppState>>,
@@ -55,7 +55,7 @@ pub async fn create_user(
 ) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
     match app_state
         .db
-        .create_user_service(&body)
+        .create_user(&body)
         .await
         .map_err(MyError::from)
     {
