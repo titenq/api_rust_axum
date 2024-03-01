@@ -1,4 +1,4 @@
-pub fn remove_accent(s: &str) -> String {
+/* pub fn remove_accent(s: &str) -> String {
     let mut result: String = String::with_capacity(s.len());
 
     for c in s.chars() {
@@ -14,4 +14,4 @@ pub fn remove_accent(s: &str) -> String {
     }
 
     result
-}
+} */
